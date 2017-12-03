@@ -24,7 +24,6 @@ inline string getImageName(const string & img_name)
 
 int main(int argc, char ** argv)
 {
-
 	//get imput image
 	if (argc < 2)
 	{
@@ -35,6 +34,7 @@ int main(int argc, char ** argv)
 	Hedcut hedcut;
 	bool debug = false;                //output debugging information
 	int sample_size = 1000;
+
 
 	string img_filename;
 	for (int i = 1; i < argc; i++)
@@ -52,6 +52,10 @@ int main(int argc, char ** argv)
 			else if (string(argv[i]) == "-avg" && i + 1 < argc) hedcut.average_termination = true;
 			else if (string(argv[i]) == "-gpu" && i + 1 < argc) hedcut.gpu = true;
 			else if (string(argv[i]) == "-subpixel" && i + 1 < argc) hedcut.subpixels = atoi(argv[++i]);
+			else if (string(argv[i]) == "-size_weight" && i + 1 < argc) hedcut.size_weight = atof(argv[++i]);
+			else if (string(argv[i]) == "-auto_size" && i + 1 < argc) hedcut.auto_size = true;
+			else if (string(argv[i]) == "-anneal_rate" && i + 1 < argc) hedcut.anneal_rate = atof(argv[++i]);
+			else if (string(argv[i]) == "-max_weight" && i + 1 < argc) hedcut.max_weight = atof(argv[++i]);
 			else
 				cerr << "! Error: Unknown flag " << argv[i] << ".  Ignored." << endl;
 		}

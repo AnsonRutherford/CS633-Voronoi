@@ -17,6 +17,10 @@ Hedcut::Hedcut()
 	average_termination = false;
 	gpu = false;
 	subpixels = 1;
+	size_weight = 100;
+	auto_size = false;
+	anneal_rate = 1;
+	max_weight = 1;
 
 	debug = false;
 }
@@ -28,9 +32,21 @@ bool Hedcut::build(cv::Mat & input_image, int n)
 	cv::Mat grayscale;
 	cv::cvtColor(input_image, grayscale, CV_BGR2GRAY);
 
+
 	//sample n points
 	std::vector<cv::Point2d> pts;
 	sample_initial_points(grayscale, n, pts);
+
+	double i = 0.0;
+	if (auto_size) {
+		for (int x = 0; x < grayscale.size().width; x++) {
+			for (int y = 0; y < grayscale.size().height; y++) {
+				i += 1.0 - (grayscale.at<uchar>(x, y)*1.0/255);
+			}
+		}
+		disk_size *= (float)sqrt(i/n);
+		std::cout << "Calculated disk size: " << disk_size << std::endl;
+	}
 
 	//initialize cvt
 	CVT cvt;
@@ -41,6 +57,10 @@ bool Hedcut::build(cv::Mat & input_image, int n)
 	cvt.gpu = this->gpu;
 	cvt.subpixels = this->subpixels;
 	cvt.debug = this->debug;
+	cvt.size_weight = this->size_weight;
+	cvt.auto_size = this->auto_size;
+	cvt.anneal_rate = this->anneal_rate;
+	cvt.max_weight = this->max_weight;
 
 	clock_t startTime, endTime;
 	startTime = clock();
@@ -132,7 +152,7 @@ void Hedcut::create_disks(cv::Mat & img, CVT & cvt)
 		disk.center.x = cell.site.y; //x = col
 		disk.center.y = cell.site.x; //y = row
 		disk.color = (black_disk) ? cv::Scalar::all(0) : cv::Scalar(r, g, b, 0.0);
-		disk.radius = (uniform_disk_size) ? disk_size : (100 * disk_size / (avg_v + 100));
+		disk.radius = (uniform_disk_size) ? disk_size : (cvt.size_weight * disk_size / (avg_v + cvt.size_weight));
 
 		//remember
 		this->disks.push_back(disk);

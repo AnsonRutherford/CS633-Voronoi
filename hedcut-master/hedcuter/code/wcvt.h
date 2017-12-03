@@ -64,6 +64,10 @@ public:
 		average_termination = false;
 		subpixels = 1;
 		debug = false;
+		size_weight = 100;
+		auto_size = false;
+		anneal_rate = 1;
+		max_weight = 1;
 	}
 
 	void compute_weighted_cvt(cv::Mat &  img, std::vector<cv::Point2d> & pts);
@@ -79,6 +83,10 @@ public:
 	bool average_termination;
 	bool gpu;
 	int subpixels;
+	float size_weight;	//the amount the size of the cell informs the size of the disk
+	bool auto_size;		//modify the disk_size based on the input image and number of disks
+	float anneal_rate;	//the amount to multiply the max_site_displacement after each generation
+	float max_weight;	//how much to value the maximum displacement over the average
 
 	bool debug;
 
@@ -143,27 +151,24 @@ private:
 	inline float move_sites(cv::Mat &  img)
 	{
 		float max_offset = 0;
-		if (average_termination)
+		float avg_offset = 0;
+		for (auto& cell : this->cells)
 		{
-			for (auto& cell : this->cells)
-			{
-				//cout << "coverage size=" << cvt.cells[607].coverage.size() << endl;
-				float offset = move_sites(img, cell);
-				max_offset += offset;
-			}
-
-			max_offset /= this->cells.size();
+			float offset = move_sites(img, cell);
+			if (offset > max_offset) 
+				max_offset = offset;
+			avg_offset += offset;
 		}
-		else
-		{
-			for (auto& cell : this->cells)
-			{
-				//cout << "coverage size=" << cvt.cells[607].coverage.size() << endl;
-				float offset = move_sites(img, cell);
-				if (offset > max_offset)
-					max_offset = offset;
-			}
+		avg_offset /= this->cells.size();
+		if (average_termination) {
+			return avg_offset;
 		}
-		return max_offset;
+		else {
+			float off = max_weight * max_offset + (1-max_weight) * avg_offset;
+			if (max_weight != 1) {
+				std::cout << "Maximum Offset: " << max_offset << ", Average Offset: " << avg_offset << ", Result: " << off << std::endl;
+			}
+			return off;
+		}
 	}
 };
