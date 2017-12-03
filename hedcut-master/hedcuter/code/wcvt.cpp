@@ -156,6 +156,9 @@ void CVT::compute_weighted_cvt(cv::Mat &  img, std::vector<cv::Point2d> & sites)
 
 		if (debug) std::cout << "[" << iteration << "] max dist moved = " << max_dist_moved << std::endl;
 		iteration++;
+		max_site_displacement *= anneal_rate;
+		if (anneal_rate != 1)
+			std::cout << "New Max Site Displacement: " << max_site_displacement << std::endl;
 	} while (max_dist_moved>max_site_displacement && iteration < this->iteration_limit);
 
 	//if (debug) cv::waitKey();

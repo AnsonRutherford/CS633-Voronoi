@@ -43,6 +43,10 @@ public:
 	bool average_termination;	//ture when the algorithm terminates with average displacement, not max displacement
 	bool gpu;					//true when using GPU acceleration
 	int subpixels;		//the number of subpixels per a pixel
+	float size_weight;	//the amount the size of the cell informs the size of the disk
+	bool auto_size;		//modify the disk_size based on the input image and number of disks
+	float anneal_rate;	//the amount to multiply the max_site_displacement after each generation
+	float max_weight;	//how much to value the maximum displacement over the average
 							
 	bool debug; //if true, debug information will be excuted
 
